@@ -2,25 +2,20 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Vehicle : MonoBehaviour
+public class Car : MonoBehaviour
 {
 
-    [Header("Wheel")]
+    [Header("References")]
+    public Transform[] suspensionPoints;
     public Transform[] driveWheels;
     public Transform[] frontWheels;
-    public Vector3[] contactPoints;
-    public Transform[] wheelsTransform;
-
-    [Header("Debug")]
-    public Vector3[] tireVelocity;
-    public float steeringVel;
 
     [Header("Suspension")]
-    public Transform[] suspensionPoints;
-    public float suspensionRestDistance;
-    public float suspensionTravelDistance;
-    public float springDamper;
-    public float springStrength;
+    public Transform[] wheels;
+    public float restDist;
+    public float travelDist;
+    public float damper;
+    public float stiffness;
     public float tireRadius;
 
     [Header("Acceleration")]
@@ -47,16 +42,16 @@ public class Vehicle : MonoBehaviour
 
     private void Start()
     {
-        tireVelocity = new Vector3[4];
-
         carRigidbody = GetComponent<Rigidbody>();
         carTransform = GetComponent<Transform>();
+
+        ResetState();
     }
 
     private void Update()
     {
         GetPlayerInput();
-        // RotateWheel();
+        RotateWheel();
     }
 
     private void FixedUpdate()
@@ -68,10 +63,7 @@ public class Vehicle : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        if (carRigidbody)
-        {
-            Visualisation();
-        }
+        // if (carRigidbody) Visualisation();
     }
 
     #endregion
@@ -82,12 +74,22 @@ public class Vehicle : MonoBehaviour
 
     #region Player Input
 
+    private void ResetState()
+    {
+        transform.position = Vector3.up * 3;
+        carRigidbody.velocity = Vector3.zero;
+        transform.rotation = Quaternion.identity;
+    }
+
     private void GetPlayerInput()
     {
         horInput = Input.GetAxisRaw("Horizontal");
         verInput = Input.GetAxisRaw("Vertical");
 
-        if (Input.GetKeyDown(KeyCode.Space)) Debug.Break();
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            ResetState();
+        }
     }
 
     #endregion
@@ -96,39 +98,37 @@ public class Vehicle : MonoBehaviour
 
     private void Suspension()
     {
-
-        float raycastDistance = suspensionRestDistance + suspensionTravelDistance + tireRadius;
+        float raycastDistance = restDist + travelDist + tireRadius;
 
         for (int i = 0; i < suspensionPoints.Length; i++)
         {
+
             Transform suspensionPoint = suspensionPoints[i];
 
             Ray ray = new Ray(suspensionPoint.position, -suspensionPoint.up);
 
             if (Physics.Raycast(ray, out RaycastHit hit, raycastDistance))
             {
-                contactPoints[i] = hit.point;
-                
+
                 Vector3 springDirection = suspensionPoint.up;
 
                 Vector3 tireWorldVelocicty = carRigidbody.GetPointVelocity(suspensionPoint.position);
 
-                float offset = suspensionRestDistance - (hit.distance - tireRadius);
+                float offset = restDist - (hit.distance - tireRadius);
 
                 float springVelocity = Vector3.Dot(springDirection, tireWorldVelocicty);
 
-                float dampForce = (offset * springStrength) - (springVelocity * springDamper);
+                float dampForce = (offset * stiffness) - (springVelocity * damper);
 
-                carRigidbody.AddForceAtPosition(springDirection * dampForce, contactPoints[i]);
+                carRigidbody.AddForceAtPosition(springDirection * dampForce, suspensionPoint.position);
 
-                Debug.DrawLine(contactPoints[i], contactPoints[i] + suspensionPoint.up * dampForce);
-
-                wheelsTransform[i].position = contactPoints[i] + suspensionPoint.up * tireRadius;
+                wheels[i].position =  hit.point + suspensionPoint.up * tireRadius;
             }
             else
             {
-                wheelsTransform[i].position = suspensionPoint.position - suspensionPoint.up * (raycastDistance - tireRadius);
+                wheels[i].localPosition = (raycastDistance - tireRadius) * -suspensionPoint.up;
             }
+
         }
     }
 
@@ -136,14 +136,10 @@ public class Vehicle : MonoBehaviour
 
     #region Acceleration
 
-    // car's center of gravity shifts towards the rear as a result of acceleration, causing the front suspension to compress and the rear suspension to extend, resulting in the front end lifting up.
-
-    // front-wheel drive cars cause less lifting compared to rear-wheel drive cars. lower center of gravity and stiffer suspension experience less lifting
-
     private void Acceleration()
     {
 
-        float raycastDistance = suspensionRestDistance + suspensionTravelDistance + tireRadius;
+        float raycastDistance = restDist + travelDist + tireRadius;
 
         foreach (Transform tireTransform in driveWheels)
         {
@@ -159,13 +155,15 @@ public class Vehicle : MonoBehaviour
 
                 if (verInput > 0.0f)
                 {
+                    if (carSpeed >= 0) {
+                        float normalizedSpeed = Mathf.Clamp01(Mathf.Abs(carSpeed) / carTopSpeed);
 
-                    float normalizedSpeed = Mathf.Clamp01(Mathf.Abs(carSpeed) / carTopSpeed);
+                        float availableTorque = powerCurve.Evaluate(normalizedSpeed) * verInput * accelPower;
 
-                    float availableTorque = powerCurve.Evaluate(normalizedSpeed) * verInput * accelPower;
-
-                    carRigidbody.AddForceAtPosition(accelerationDirection * availableTorque, tireTransform.position, ForceMode.Acceleration);
-
+                        carRigidbody.AddForceAtPosition(accelerationDirection * availableTorque, tireTransform.position, ForceMode.Acceleration);
+                    } else {
+                        carRigidbody.AddForceAtPosition(accelerationDirection * breakPower, tireTransform.position, ForceMode.Acceleration);
+                    }
                 }
                 else if (verInput < 0.0f)
                 {
@@ -191,7 +189,7 @@ public class Vehicle : MonoBehaviour
     private void Steering()
     {
 
-        float raycastDistance = suspensionRestDistance + suspensionTravelDistance + tireRadius;
+        float raycastDistance = restDist + travelDist + tireRadius;
 
         foreach (Transform tireTransform in suspensionPoints)
         {
@@ -205,11 +203,14 @@ public class Vehicle : MonoBehaviour
 
                 Vector3 tireWorldVel = carRigidbody.GetPointVelocity(tireTransform.position);
 
-                steeringVel = Vector3.Dot(steeringDir, tireWorldVel);
+                float steeringVel = Vector3.Dot(steeringDir, tireWorldVel);
 
                 float desiredVelChange = -steeringVel * tireGripFactor;
 
                 float desiredAccel = desiredVelChange / Time.fixedDeltaTime;
+
+                Debug.DrawLine(tireTransform.position, tireTransform.position + desiredAccel * steeringDir, Color.green);
+                Debug.DrawLine(tireTransform.position, tireTransform.position + steeringVel * steeringDir, Color.red);
 
                 carRigidbody.AddForceAtPosition(steeringDir * desiredAccel, tireTransform.position);
 
@@ -231,7 +232,7 @@ public class Vehicle : MonoBehaviour
             // rotate left return positive angle instead of negative angle (eg: 359 instead of -1)
             if (currentSteeringAngle > 180) currentSteeringAngle -= 360;
 
-            float rotateAngle = horInput != 0 ? (horInput * rotateSpeed * Time.deltaTime) : 0 ;
+            float rotateAngle = horInput != 0 ? (horInput * rotateSpeed * Time.deltaTime) : (0.5f * rotateSpeed * Time.deltaTime * -Mathf.Sign(currentSteeringAngle));
             float newSteeringAngle = rotateAngle + currentSteeringAngle;
 
             tireTransform.localEulerAngles = Mathf.Clamp(newSteeringAngle, -maxSteeringAngle, maxSteeringAngle) * Vector3.up;
@@ -246,8 +247,6 @@ public class Vehicle : MonoBehaviour
     {
         for (int i = 0; i < suspensionPoints.Length; i++)
         {
-            tireVelocity[i] = carRigidbody.GetPointVelocity(suspensionPoints[i].position);
-
             // Gizmos.color = Color.yellow;
             // Gizmos.DrawLine(tireTransforms[i].position, tireVelocity[i] * 10 + tireTransforms[i].position);
 
@@ -257,7 +256,6 @@ public class Vehicle : MonoBehaviour
             // Gizmos.color = Color.blue;
             // Gizmos.DrawLine(tireTransforms[i].position, Vector3.Dot(tireVelocity[i], tireTransforms[i].forward) * tireTransforms[i].forward + tireTransforms[i].position);
         }
-        
     }
 
     #endregion
