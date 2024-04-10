@@ -5,6 +5,9 @@ using UnityEngine;
 public class Car : MonoBehaviour
 {
 
+    [Header("Debug")]
+    public Vector3 centerOfMass;
+
     [Header("References")]
     public Transform[] suspensionPoints;
     public Transform[] driveWheels;
@@ -26,6 +29,8 @@ public class Car : MonoBehaviour
     public float carTopSpeed;
 
     [Header("Steering")]
+    [Range(0, 1)]
+    [Tooltip("How many percentages to be stripped")]
     public float tireGripFactor;
     public float maxSteeringAngle;
     public float rotateSpeed;
@@ -52,13 +57,14 @@ public class Car : MonoBehaviour
     {
         GetPlayerInput();
         RotateWheel();
+        centerOfMass = carRigidbody.centerOfMass;
     }
 
     private void FixedUpdate()
     {
         Suspension();
         Acceleration();
-        // Steering();
+        Steering();
     }
 
     private void OnDrawGizmos()
@@ -120,7 +126,7 @@ public class Car : MonoBehaviour
 
                 float dampForce = (offset * stiffness) - (springVelocity * damper);
 
-                carRigidbody.AddForceAtPosition(springDirection * dampForce, suspensionPoint.position);
+                carRigidbody.AddForceAtPosition(springDirection * dampForce, suspensionPoint.position, ForceMode.Acceleration);
 
                 wheels[i].position =  hit.point + suspensionPoint.up * tireRadius;
             }
@@ -191,33 +197,26 @@ public class Car : MonoBehaviour
 
         float raycastDistance = restDist + travelDist + tireRadius;
 
-        foreach (Transform tireTransform in suspensionPoints)
+        foreach (Transform suspensionPoint in suspensionPoints)
         {
 
-            Ray ray = new Ray(tireTransform.position, -tireTransform.up);
+            Ray ray = new Ray(suspensionPoint.position, -suspensionPoint.up);
 
             if (Physics.Raycast(ray, out RaycastHit hit, raycastDistance))
             {
 
-                Vector3 steeringDir = tireTransform.right;
+                Vector3 steeringDir = suspensionPoint.right;
 
-                Vector3 tireWorldVel = carRigidbody.GetPointVelocity(tireTransform.position);
+                Vector3 tireWorldVel = carRigidbody.GetPointVelocity(suspensionPoint.position);
 
                 float steeringVel = Vector3.Dot(steeringDir, tireWorldVel);
 
                 float desiredVelChange = -steeringVel * tireGripFactor;
 
-                float desiredAccel = desiredVelChange / Time.fixedDeltaTime;
-
-                Debug.DrawLine(tireTransform.position, tireTransform.position + desiredAccel * steeringDir, Color.green);
-                Debug.DrawLine(tireTransform.position, tireTransform.position + steeringVel * steeringDir, Color.red);
-
-                carRigidbody.AddForceAtPosition(steeringDir * desiredAccel, tireTransform.position);
+                carRigidbody.AddForceAtPosition(desiredVelChange * steeringDir, suspensionPoint.position, ForceMode.VelocityChange);
 
             }
         }
-
-        Debug.DrawLine(carTransform.position, carRigidbody.velocity + carTransform.position, Color.blue);
 
     }
 
@@ -232,9 +231,13 @@ public class Car : MonoBehaviour
             // rotate left return positive angle instead of negative angle (eg: 359 instead of -1)
             if (currentSteeringAngle > 180) currentSteeringAngle -= 360;
 
-            float rotateAngle = horInput != 0 ? (horInput * rotateSpeed * Time.deltaTime) : (0.5f * rotateSpeed * Time.deltaTime * -Mathf.Sign(currentSteeringAngle));
-            float newSteeringAngle = rotateAngle + currentSteeringAngle;
+            float newSteeringAngle;
 
+            if (horInput == 0) {
+                newSteeringAngle = 0;
+            } else {
+                newSteeringAngle = currentSteeringAngle + horInput * rotateSpeed * Time.deltaTime;
+            }
             tireTransform.localEulerAngles = Mathf.Clamp(newSteeringAngle, -maxSteeringAngle, maxSteeringAngle) * Vector3.up;
         }
     }
