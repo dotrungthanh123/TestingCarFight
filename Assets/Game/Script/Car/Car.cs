@@ -5,9 +5,6 @@ using UnityEngine;
 public class Car : MonoBehaviour
 {
 
-    [Header("Debug")]
-    public Vector3 centerOfMass;
-
     [Header("References")]
     public Transform[] suspensionPoints;
     public Transform[] driveWheels;
@@ -30,18 +27,26 @@ public class Car : MonoBehaviour
 
     [Header("Steering")]
     [Range(0, 1)]
-    [Tooltip("How many percentages to be stripped")]
+    [Tooltip("Less grip reduce flip when steering")]
     public float tireGripFactor;
     public float maxSteeringAngle;
     public float rotateSpeed;
 
     [Header("Input")]
-    private float horInput;
-    private float verInput;
+    private int horInput;
+    private int verInput;
 
     [Header("Component")]
     private Rigidbody carRigidbody;
     private Transform carTransform;
+
+    #region Accessor
+
+    public Rigidbody CarRigidbody => carRigidbody;
+    public int HorInput => horInput;
+    public int VerInput => verInput;
+
+    #endregion
 
     #region Unity Functions
 
@@ -49,15 +54,12 @@ public class Car : MonoBehaviour
     {
         carRigidbody = GetComponent<Rigidbody>();
         carTransform = GetComponent<Transform>();
-
-        ResetState();
     }
 
     private void Update()
     {
         GetPlayerInput();
         RotateWheel();
-        centerOfMass = carRigidbody.centerOfMass;
     }
 
     private void FixedUpdate()
@@ -76,6 +78,12 @@ public class Car : MonoBehaviour
 
     #region Utilities
 
+    public void Stop() {
+        carRigidbody.velocity = Vector3.zero;
+        transform.rotation = Quaternion.identity;
+        carRigidbody.angularVelocity = Vector3.zero;
+    }
+
     #endregion
 
     #region Player Input
@@ -89,13 +97,19 @@ public class Car : MonoBehaviour
 
     private void GetPlayerInput()
     {
-        horInput = Input.GetAxisRaw("Horizontal");
-        verInput = Input.GetAxisRaw("Vertical");
+        horInput = (int) Input.GetAxisRaw("Horizontal");
+        verInput = (int) Input.GetAxisRaw("Vertical");
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
             ResetState();
         }
+    }
+
+    public void SetInput(int horInput, int verInput)
+    {
+        this.horInput = horInput;
+        this.verInput = verInput;
     }
 
     #endregion
