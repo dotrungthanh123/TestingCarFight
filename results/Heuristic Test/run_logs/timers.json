@@ -1,0 +1,47 @@
+{
+    "name": "root",
+    "metadata": {
+        "timer_format_version": "0.1.0",
+        "start_time_seconds": "1713998054",
+        "python_version": "3.8.0 (tags/v3.8.0:fa919fd, Oct 14 2019, 19:37:50) [MSC v.1916 64 bit (AMD64)]",
+        "command_line_arguments": "D:\\Unity\\Project\\TestingCarFight\\venv\\Scripts\\mlagents-learn --run-id=Heuristic Test --force --time-scale=1",
+        "mlagents_version": "0.29.0",
+        "mlagents_envs_version": "0.29.0",
+        "communication_protocol_version": "1.5.0",
+        "pytorch_version": "2.2.2+cpu",
+        "numpy_version": "1.21.2",
+        "end_time_seconds": "1713998110"
+    },
+    "total": 55.8241228,
+    "count": 1,
+    "self": 0.0036235000000033324,
+    "children": {
+        "run_training.setup": {
+            "total": 0.0200028000000001,
+            "count": 1,
+            "self": 0.0200028000000001
+        },
+        "TrainerController.start_learning": {
+            "total": 55.800496499999994,
+            "count": 1,
+            "self": 0.00031729999999896563,
+            "children": {
+                "TrainerController._reset_env": {
+                    "total": 55.8001691,
+                    "count": 1,
+                    "self": 55.8001691
+                },
+                "trainer_threads": {
+                    "total": 9.999999974752427e-07,
+                    "count": 1,
+                    "self": 9.999999974752427e-07
+                },
+                "TrainerController._save_models": {
+                    "total": 9.099999999762076e-06,
+                    "count": 1,
+                    "self": 9.099999999762076e-06
+                }
+            }
+        }
+    }
+}

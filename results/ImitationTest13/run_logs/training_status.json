@@ -1,0 +1,38 @@
+{
+    "PoliceBot": {
+        "checkpoints": [
+            {
+                "steps": 74304,
+                "file_path": "results\\ImitationTest13\\PoliceBot\\PoliceBot-74304.onnx",
+                "reward": null,
+                "creation_time": 1714004024.7533472,
+                "auxillary_file_paths": [
+                    "results\\ImitationTest13\\PoliceBot\\PoliceBot-74304.pt"
+                ]
+            },
+            {
+                "steps": 110592,
+                "file_path": "results\\ImitationTest13\\PoliceBot\\PoliceBot-110592.onnx",
+                "reward": null,
+                "creation_time": 1714004314.612473,
+                "auxillary_file_paths": [
+                    "results\\ImitationTest13\\PoliceBot\\PoliceBot-110592.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 110592,
+            "file_path": "results\\ImitationTest13\\PoliceBot.onnx",
+            "reward": null,
+            "creation_time": 1714004314.612473,
+            "auxillary_file_paths": [
+                "results\\ImitationTest13\\PoliceBot\\PoliceBot-110592.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "0.29.0",
+        "torch_version": "2.2.2+cpu"
+    }
+}

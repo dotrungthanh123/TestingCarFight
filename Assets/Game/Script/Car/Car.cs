@@ -58,7 +58,7 @@ public class Car : MonoBehaviour
 
     private void Update()
     {
-        GetPlayerInput();
+        // GetPlayerInput();
         RotateWheel();
     }
 

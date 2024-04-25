@@ -1,0 +1,29 @@
+{
+    "PoliceBot": {
+        "checkpoints": [
+            {
+                "steps": 960,
+                "file_path": "results\\ImitationTest9\\PoliceBot\\PoliceBot-960.onnx",
+                "reward": null,
+                "creation_time": 1714002983.1682887,
+                "auxillary_file_paths": [
+                    "results\\ImitationTest9\\PoliceBot\\PoliceBot-960.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 960,
+            "file_path": "results\\ImitationTest9\\PoliceBot.onnx",
+            "reward": null,
+            "creation_time": 1714002983.1682887,
+            "auxillary_file_paths": [
+                "results\\ImitationTest9\\PoliceBot\\PoliceBot-960.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "0.29.0",
+        "torch_version": "2.2.2+cpu"
+    }
+}

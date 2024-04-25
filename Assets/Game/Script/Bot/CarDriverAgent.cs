@@ -33,20 +33,27 @@ public class CarDriverAgent : Agent
             AddReward(-1);
         }
     }
+    
+    private void OnCollisionEnter(Collision other) {
+        AddReward(-1);
+    }
+    
+    private void OnCollisionStay(Collision other) {
+        AddReward(-0.1f);
+    }
 
     public override void CollectObservations(VectorSensor sensor)
     {
         Vector3 checkPointForward = track.getNextCheckPoint(transform).transform.forward;
         float directionDot = Vector3.Dot(transform.forward, checkPointForward);
         sensor.AddObservation(directionDot);
-        sensor.AddObservation(car.CarRigidbody.velocity);
     }
 
     public override void OnEpisodeBegin()
     {
         transform.position = spawnPosition.position + new Vector3(Random.Range(-2, 2), 0, Random.Range(-2, 2));
         transform.forward = spawnPosition.forward;
-        track.Reset(transform);
+        track.Restart(transform);
         car.Stop();
     }
 
@@ -66,14 +73,14 @@ public class CarDriverAgent : Agent
             case 2: horInput = -1; break;
         }
 
-        car.SetInput(horInput, verInput);
+        car.SetInput(verInput, horInput);
     }
 
     public override void Heuristic(in ActionBuffers actionsOut)
     {
         ActionSegment<int> discreteActions = actionsOut.DiscreteActions;
-        discreteActions[0] = car.VerInput;
-        discreteActions[1] = car.HorInput;
+        discreteActions[0] = car.VerInput == 0 ? 0 : car.VerInput > 0 ? 1 : 2;
+        discreteActions[1] = car.HorInput == 0 ? 0 : car.HorInput > 0 ? 1 : 2;
     }
 
 

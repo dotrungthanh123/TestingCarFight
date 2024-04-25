@@ -35,18 +35,17 @@ public class TrackCheckPoints : MonoBehaviour
     }
 
     public void CarThroughCheckpoint(CheckPointSingle checkPointSingle, Transform car) {
-        int nextCheckpointSingleIndex = nextCheckpointIndex[cars.IndexOf(car)];
+        int carIndex = cars.IndexOf(car);
+        int nextCheckpointSingleIndex = nextCheckpointIndex[carIndex];
         if (Array.IndexOf(checkPoints, checkPointSingle) == nextCheckpointSingleIndex) {
-            nextCheckpointIndex[nextCheckpointSingleIndex] = (nextCheckpointIndex[nextCheckpointSingleIndex] + 1) % checkPoints.Length;
+            nextCheckpointIndex[carIndex] = (nextCheckpointSingleIndex + 1) % checkPoints.Length;
             onCorrectCheckpoint?.Invoke(this, new TrackEventArgs(car));
-            Debug.Log(1);
         } else {
             onWrongCheckpoint?.Invoke(this, new TrackEventArgs(car));
-            Debug.Log(2);
         }
     }
 
-    public void Reset(Transform car) {
+    public void Restart(Transform car) {
         nextCheckpointIndex[cars.IndexOf(car)] = 0;
     }
 

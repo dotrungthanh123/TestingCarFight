@@ -1,0 +1,89 @@
+{
+    "name": "root",
+    "metadata": {
+        "timer_format_version": "0.1.0",
+        "start_time_seconds": "1714000246",
+        "python_version": "3.8.0 (tags/v3.8.0:fa919fd, Oct 14 2019, 19:37:50) [MSC v.1916 64 bit (AMD64)]",
+        "command_line_arguments": "D:\\Unity\\Project\\TestingCarFight\\venv\\Scripts\\mlagents-learn config/botAgent.yaml --run-id=ImitationTest4",
+        "mlagents_version": "0.29.0",
+        "mlagents_envs_version": "0.29.0",
+        "communication_protocol_version": "1.5.0",
+        "pytorch_version": "2.2.2+cpu",
+        "numpy_version": "1.21.2",
+        "end_time_seconds": "1714000251"
+    },
+    "total": 5.22087,
+    "count": 1,
+    "self": 0.005456899999999543,
+    "children": {
+        "run_training.setup": {
+            "total": 0.07259689999999996,
+            "count": 1,
+            "self": 0.07259689999999996
+        },
+        "TrainerController.start_learning": {
+            "total": 5.1428162,
+            "count": 1,
+            "self": 0.00013630000000031117,
+            "children": {
+                "TrainerController._reset_env": {
+                    "total": 5.1371499,
+                    "count": 1,
+                    "self": 4.8775724,
+                    "children": {
+                        "demo_to_buffer": {
+                            "total": 0.2595774999999998,
+                            "count": 1,
+                            "self": 4.0899999999233216e-05,
+                            "children": {
+                                "load_demonstration": {
+                                    "total": 0.0042168000000000205,
+                                    "count": 1,
+                                    "self": 0.004123300000000718,
+                                    "children": {
+                                        "read_file": {
+                                            "total": 9.349999999930247e-05,
+                                            "count": 1,
+                                            "self": 9.349999999930247e-05
+                                        }
+                                    }
+                                },
+                                "make_demo_buffer": {
+                                    "total": 0.25531980000000054,
+                                    "count": 1,
+                                    "self": 0.03721919999998846,
+                                    "children": {
+                                        "steps_from_proto": {
+                                            "total": 0.21810060000001208,
+                                            "count": 2986,
+                                            "self": 0.1388883000000254,
+                                            "children": {
+                                                "_process_rank_one_or_two_observation": {
+                                                    "total": 0.07921229999998669,
+                                                    "count": 11944,
+                                                    "self": 0.07921229999998669
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "TrainerController._save_models": {
+                    "total": 0.005530000000000257,
+                    "count": 1,
+                    "self": 0.00010000000000065512,
+                    "children": {
+                        "RLTrainer._checkpoint": {
+                            "total": 0.005429999999999602,
+                            "count": 1,
+                            "self": 0.005429999999999602
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
