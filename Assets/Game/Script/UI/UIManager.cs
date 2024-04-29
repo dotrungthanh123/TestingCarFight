@@ -11,8 +11,9 @@ public class UIManager : MonoBehaviour
     [SerializeField] private ScrollList scrollList;
     
     public void CloseShop() {
-        shop.transform.DOMoveY(-540, 1);
+        shop.transform.DOMoveY(-1080, 1);
         shop.SetActive(false);
+        scrollList.UnLoad();
     }
 
     public void OpenMenu() {
@@ -23,7 +24,6 @@ public class UIManager : MonoBehaviour
     public void CloseMenu() {
         menu.transform.DOMoveY(1620, 1);
         menu.SetActive(false);
-        scrollList.UnLoad();
     }
 
     public void OpenShop() {

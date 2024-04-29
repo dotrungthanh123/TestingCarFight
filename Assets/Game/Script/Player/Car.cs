@@ -15,7 +15,7 @@ public class Car : MonoBehaviour
     public float restDist;
     public float travelDist;
     public float damper;
-    public float stiffness;
+    public float power;
     public float tireRadius;
 
     [Header("Acceleration")]
@@ -113,7 +113,7 @@ public class Car : MonoBehaviour
 
                 float springVelocity = Vector3.Dot(springDirection, tireWorldVelocicty);
 
-                float dampForce = (offset * stiffness) - (springVelocity * damper);
+                float dampForce = (offset * power) - (springVelocity * damper);
 
                 carRigidbody.AddForceAtPosition(springDirection * dampForce, suspensionPoint.position, ForceMode.Acceleration);
 
