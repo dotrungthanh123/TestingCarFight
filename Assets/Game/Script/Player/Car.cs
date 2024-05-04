@@ -6,29 +6,29 @@ public class Car : MonoBehaviour
 {
 
     [Header("References")]
-    public Transform[] suspensionPoints;
-    public Transform[] driveWheels;
-    public Transform[] frontWheels;
+    [SerializeField] private Transform[] suspensionPoints;
+    [SerializeField] private Transform[] driveWheels;
+    [SerializeField] private Transform[] frontWheels;
 
     [Header("Suspension")]
-    public Transform[] wheels;
-    public float restDist;
-    public float travelDist;
-    public float damper;
-    public float power;
-    public float tireRadius;
+    [SerializeField] private Transform[] wheels;
+    [SerializeField] private float restDist;
+    [SerializeField] private float travelDist;
+    [SerializeField] private float damper;
+    [SerializeField] private float power;
+    [SerializeField] private float tireRadius;
 
     [Header("Acceleration")]
-    public AnimationCurve powerCurve;
-    public float breakPower;
-    public float backPower;
-    public float accelPower;
-    public float carTopSpeed;
+    [SerializeField] private AnimationCurve powerCurve;
+    [SerializeField] private float breakPower;
+    [SerializeField] private float backPower;
+    [SerializeField] private float accelPower;
+    [SerializeField] private float carTopSpeed;
 
     [Header("Steering")]
-    public float tireGripFactor;
-    public float maxSteeringAngle;
-    public float rotateSpeed;
+    [SerializeField] private float tireGripFactor;
+    [SerializeField] private float maxSteeringAngle;
+    [SerializeField] private float rotateSpeed;
 
     [Header("Input")]
     private float horInput;
@@ -43,6 +43,8 @@ public class Car : MonoBehaviour
     public Rigidbody CarRigidbody => carRigidbody;
     public float HorInput => horInput;
     public float VerInput => verInput;
+    public float CarTopSpeed => carTopSpeed;
+    public float MaxSteeringAngle => maxSteeringAngle;
 
     #endregion
 
@@ -113,9 +115,9 @@ public class Car : MonoBehaviour
 
                 float springVelocity = Vector3.Dot(springDirection, tireWorldVelocicty);
 
-                float dampForce = (offset * power) - (springVelocity * damper);
+                float suspensionForce = (offset * power) - (springVelocity * damper);
 
-                carRigidbody.AddForceAtPosition(springDirection * dampForce, suspensionPoint.position, ForceMode.Acceleration);
+                carRigidbody.AddForceAtPosition(springDirection * suspensionForce, suspensionPoint.position, ForceMode.Acceleration);
 
                 wheels[i].position =  hit.point + suspensionPoint.up * tireRadius;
             }
@@ -151,7 +153,7 @@ public class Car : MonoBehaviour
                 if (verInput > 0.0f)
                 {
                     if (carSpeed >= 0) {
-                        float normalizedSpeed = Mathf.Clamp01(Mathf.Abs(carSpeed) / carTopSpeed);
+                        float normalizedSpeed = Mathf.Clamp01(Mathf.Abs(carSpeed) / CarTopSpeed);
 
                         float availableTorque = powerCurve.Evaluate(normalizedSpeed) * verInput * accelPower;
 

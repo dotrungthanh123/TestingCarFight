@@ -22,11 +22,6 @@ public class CarFollow : MonoBehaviour
     private Car car;
     private Rigidbody rb;
     private float horInput, verInput;
-    private Vector3 targetLocalPosition;
-    private float currentSteeringAngle;
-    private float steerDir;
-    private float targetRotationAngle;
-    private float currentCarSteeringAngle;
 
     private void Start() {
         car = GetComponent<Car>();   
@@ -38,10 +33,10 @@ public class CarFollow : MonoBehaviour
     }
 
     private void Update() {
-        float squaredTargetSpeed = (targetSpeed * car.carTopSpeed) * (targetSpeed * car.carTopSpeed);
+        float squaredTargetSpeed = (targetSpeed * car.CarTopSpeed) * (targetSpeed * car.CarTopSpeed);
 
         // Transform target world position to bot local position
-        targetLocalPosition = transform.InverseTransformPoint(
+        Vector3 targetLocalPosition = transform.InverseTransformPoint(
             target.transform.position.x,
             transform.position.y,
             target.transform.position.z);
@@ -50,13 +45,11 @@ public class CarFollow : MonoBehaviour
         // Use the x value on the magnitude gives the direction to turn left or right
         // Equation does not specifically calculating how much to steer but more on steering left or right
 
-        currentCarSteeringAngle = car.CurrentSteeringAngle;
-
-        currentSteeringAngle = car.CurrentSteeringAngle > car.maxSteeringAngle + 1 ? 
+        float currentSteeringAngle = car.CurrentSteeringAngle > car.MaxSteeringAngle + 1 ? 
                                                             car.CurrentSteeringAngle - 360 : car.CurrentSteeringAngle;
 
-        steerDir = targetLocalPosition.x / targetLocalPosition.magnitude;
-        targetRotationAngle = car.maxSteeringAngle * steerDir;
+        float steerDir = targetLocalPosition.x / targetLocalPosition.magnitude;
+        float targetRotationAngle = car.MaxSteeringAngle * steerDir;
         
         if (targetRotationAngle > currentSteeringAngle)
         {
@@ -70,7 +63,7 @@ public class CarFollow : MonoBehaviour
 
         Sensor();
 
-        horInput += Mathf.Clamp(horAvoidScaler * horAvoidInput, -3, 3);
+        horInput += Mathf.Clamp(horAvoidScaler * horAvoidInput, -2.5f, 2.5f);
 
         float squaredVelocity = rb.velocity.x * rb.velocity.x + rb.velocity.y * rb.velocity.y;
 
@@ -103,52 +96,27 @@ public class CarFollow : MonoBehaviour
                 // Angle A = angle between normal and direction
                 // |A| proportional to angle required to rotate
                 
-                Debug.DrawLine(leftSensor.position, leftSensor.position + direction * sensorDistance, Color.red);
-
                 float A = Mathf.Abs(Vector3.Angle(hit.normal, direction));
                 horAvoidInput += A / baseAngle;
-            } else {
-                Debug.DrawLine(leftSensor.position, leftSensor.position + direction * sensorDistance);
             }
 
             // mid left
             if (Physics.Raycast(midSensor.position, direction, out hit, sensorDistance, obstacleLayer)) {
-                // Angle A = angle between normal and direction
-                // |A| proportional to angle required to rotate
-                
-                Debug.DrawLine(midSensor.position, midSensor.position + direction * sensorDistance, Color.red);
-
                 float A = Mathf.Abs(Vector3.Angle(hit.normal, direction));
                 horAvoidInput += A / baseAngle;
-            } else {
-                Debug.DrawLine(midSensor.position, midSensor.position + direction * sensorDistance);
             }
 
             // right
             direction = Quaternion.AngleAxis(i * sensorAngleStep, transform.up) * transform.forward;
             if (Physics.Raycast(rightSensor.position, direction, out hit, sensorDistance, obstacleLayer)) {
-                // Angle A = angle between normal and direction
-                // |A| proportional to angle required to rotate
-
-                Debug.DrawLine(rightSensor.position, rightSensor.position + direction * sensorDistance, Color.red);
-
                 float A = Mathf.Abs(Vector3.Angle(hit.normal, direction));
                 horAvoidInput -= A / baseAngle;
-            } else {
-                Debug.DrawLine(rightSensor.position, rightSensor.position + direction * sensorDistance);
             }
 
             // mid right
             if (Physics.Raycast(midSensor.position, direction, out hit, sensorDistance, obstacleLayer)) {
-                // Angle A = angle between normal and direction
-                // |A| proportional to angle required to rotate
-
-                Debug.DrawLine(midSensor.position, midSensor.position + direction * sensorDistance, Color.red);
-
                 float A = Mathf.Abs(Vector3.Angle(hit.normal, direction));
                 horAvoidInput -= A / baseAngle;
-            } else {
-                Debug.DrawLine(midSensor.position, midSensor.position + direction * sensorDistance);
             }
         }
     }
