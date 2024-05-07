@@ -555,7 +555,6 @@ GameObject:
   - component: {fileID: 6688518176124179665}
   - component: {fileID: 3651967780951320383}
   - component: {fileID: 6699667636255932796}
-  - component: {fileID: 2713501985539223792}
   m_Layer: 7
   m_Name: Car
   m_TagString: Untagged
@@ -595,17 +594,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cc064570add477541adeb96e8bda0b26, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  suspensionPoints:
-  - {fileID: 941177025786923653}
-  - {fileID: 6262402545313751696}
-  - {fileID: 5320020969383585235}
-  - {fileID: 7619400885526562225}
-  driveWheels:
-  - {fileID: 941177025786923653}
-  - {fileID: 6262402545313751696}
   frontWheels:
   - {fileID: 941177025786923653}
   - {fileID: 6262402545313751696}
+  rearWheels:
+  - {fileID: 5320020969383585235}
+  - {fileID: 7619400885526562225}
+  frontWheelDrive: 1
   wheels:
   - {fileID: 3532991778424671242}
   - {fileID: 8706489811989851890}
@@ -613,7 +608,7 @@ MonoBehaviour:
   - {fileID: 5921720829974613057}
   restDist: 0.14
   travelDist: 0.1
-  damper: 8
+  damper: 5
   power: 100
   tireRadius: 0.36
   powerCurve:
@@ -685,13 +680,25 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  breakPower: 15
-  backPower: 5
-  accelPower: 15
-  carTopSpeed: 20
+  breakPower: 10
+  backPower: 2
+  accelPower: 10
+  carTopSpeed: 30
+  frontWheelGrip:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  rearWheelGrip:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
   tireGripFactor: 0.04
   maxSteeringAngle: 20
-  rotateSpeed: 1440
+  rotateSpeed: 720
 --- !u!54 &3651967780951320383
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -741,18 +748,6 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 4300000, guid: db57e923d75cb6c4e936d5e8caaa9165, type: 3}
---- !u!114 &2713501985539223792
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6129756899026733912}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1f29ca91c538b964bbce3c1ebafc34af, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &6460757717058643318
 GameObject:
   m_ObjectHideFlags: 0

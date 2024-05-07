@@ -1,14 +1,12 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Car : MonoBehaviour
 {
 
     [Header("References")]
-    [SerializeField] private Transform[] suspensionPoints;
-    [SerializeField] private Transform[] driveWheels;
     [SerializeField] private Transform[] frontWheels;
+    [SerializeField] private Transform[] rearWheels;
+    [SerializeField] private bool frontWheelDrive;
 
     [Header("Suspension")]
     [SerializeField] private Transform[] wheels;
@@ -26,6 +24,8 @@ public class Car : MonoBehaviour
     [SerializeField] private float carTopSpeed;
 
     [Header("Steering")]
+    [SerializeField] private AnimationCurve frontWheelGrip;
+    [SerializeField] private AnimationCurve rearWheelGrip;
     [SerializeField] private float tireGripFactor;
     [SerializeField] private float maxSteeringAngle;
     [SerializeField] private float rotateSpeed;
@@ -38,6 +38,10 @@ public class Car : MonoBehaviour
     private Rigidbody carRigidbody;
     private Transform carTransform;
 
+    [Header("Shared")]
+    private float raycastDistance;
+    private RaycastHit hit;
+
     #region Accessor
 
     public Rigidbody CarRigidbody => carRigidbody;
@@ -45,6 +49,8 @@ public class Car : MonoBehaviour
     public float VerInput => verInput;
     public float CarTopSpeed => carTopSpeed;
     public float MaxSteeringAngle => maxSteeringAngle;
+    public float CurrentSteeringAngle => frontWheels[0].localEulerAngles.y;
+    public float SpeedRatio => Vector3.Dot(transform.forward, carRigidbody.velocity) / carTopSpeed;
 
     #endregion
 
@@ -58,26 +64,46 @@ public class Car : MonoBehaviour
 
     private void Update()
     {
+        raycastDistance = tireRadius + restDist + travelDist;
         RotateWheel();
     }
 
     private void FixedUpdate()
     {
-        Suspension();
-        Acceleration();
-        Steering();
+        foreach (Transform wheel in frontWheels) {
+            if (WheelRayCast(wheel)) {
+                if (frontWheelDrive) Acceleration(wheel);
+                ApplyPhysics(wheel);
+            }
+        }
+
+        foreach (Transform wheel in rearWheels) {
+            if (WheelRayCast(wheel)) {
+                if (!frontWheelDrive) Acceleration(wheel);
+                ApplyPhysics(wheel);
+            }
+        }
     }
 
     private void OnDrawGizmos()
     {
-        // if (carRigidbody) Visualisation();
+        if (carRigidbody) Visualisation();
     }
 
     #endregion
 
     #region Utilities
 
-    public float CurrentSteeringAngle => frontWheels[0].localEulerAngles.y;
+    private bool WheelRayCast(Transform wheel) {
+        Ray ray = new Ray(wheel.position, -wheel.up);
+
+        return Physics.Raycast(ray, out hit, raycastDistance);
+    }
+
+    private void ApplyPhysics(Transform wheel) {
+        Suspension(wheel);
+        Steering(wheel);
+    }
 
     #endregion
 
@@ -93,122 +119,77 @@ public class Car : MonoBehaviour
 
     #region Suspension
 
-    private void Suspension()
+    private void Suspension(Transform wheel)
     {
-        float raycastDistance = restDist + travelDist + tireRadius;
+        Vector3 springDirection = wheel.up;
 
-        for (int i = 0; i < suspensionPoints.Length; i++)
-        {
+        Vector3 tireWorldVelocicty = carRigidbody.GetPointVelocity(wheel.position);
 
-            Transform suspensionPoint = suspensionPoints[i];
+        float offset = restDist - (hit.distance - tireRadius);
 
-            Ray ray = new Ray(suspensionPoint.position, -suspensionPoint.up);
+        float springVelocity = Vector3.Dot(springDirection, tireWorldVelocicty);
 
-            if (Physics.Raycast(ray, out RaycastHit hit, raycastDistance))
-            {
+        float suspensionForce = (offset * power) - (springVelocity * damper);
 
-                Vector3 springDirection = suspensionPoint.up;
+        carRigidbody.AddForceAtPosition(springDirection * suspensionForce, wheel.position, ForceMode.Acceleration);
 
-                Vector3 tireWorldVelocicty = carRigidbody.GetPointVelocity(suspensionPoint.position);
-
-                float offset = restDist - (hit.distance - tireRadius);
-
-                float springVelocity = Vector3.Dot(springDirection, tireWorldVelocicty);
-
-                float suspensionForce = (offset * power) - (springVelocity * damper);
-
-                carRigidbody.AddForceAtPosition(springDirection * suspensionForce, suspensionPoint.position, ForceMode.Acceleration);
-
-                wheels[i].position =  hit.point + suspensionPoint.up * tireRadius;
-            }
-            else
-            {
-                wheels[i].localPosition = (raycastDistance - tireRadius) * -suspensionPoint.up;
-            }
-
-        }
+        // wheels[i].position =  hit.point + suspensionPoint.up * tireRadius;
+        // wheels[i].localPosition = (raycastDistance - tireRadius) * -suspensionPoint.up;
     }
 
     #endregion
 
     #region Acceleration
 
-    private void Acceleration()
+    private void Acceleration(Transform wheel)
     {
+        Vector3 accelerationDirection = wheel.forward;
 
-        float raycastDistance = restDist + travelDist + tireRadius;
+        float carSpeed = Vector3.Dot(carTransform.forward, carRigidbody.velocity);
 
-        foreach (Transform tireTransform in driveWheels)
+        if (verInput > 0.0f)
         {
-
-            Ray ray = new Ray(tireTransform.position, -tireTransform.up);
-
-            if (Physics.Raycast(ray, out RaycastHit hit, raycastDistance))
+            if (carSpeed >= 0)
             {
+                float normalizedSpeed = Mathf.Clamp01(Mathf.Abs(carSpeed) / CarTopSpeed);
 
-                Vector3 accelerationDirection = tireTransform.forward;
+                float availableTorque = powerCurve.Evaluate(normalizedSpeed) * verInput * accelPower;
 
-                float carSpeed = Vector3.Dot(carTransform.forward, carRigidbody.velocity);
-
-                if (verInput > 0.0f)
-                {
-                    if (carSpeed >= 0) {
-                        float normalizedSpeed = Mathf.Clamp01(Mathf.Abs(carSpeed) / CarTopSpeed);
-
-                        float availableTorque = powerCurve.Evaluate(normalizedSpeed) * verInput * accelPower;
-
-                        carRigidbody.AddForceAtPosition(accelerationDirection * availableTorque, tireTransform.position, ForceMode.Acceleration);
-                    } else {
-                        carRigidbody.AddForceAtPosition(accelerationDirection * breakPower, tireTransform.position, ForceMode.Acceleration);
-                    }
-                }
-                else if (verInput < 0.0f)
-                {
-                    if (carSpeed > 0)
-                    {
-                        carRigidbody.AddForceAtPosition(-accelerationDirection * breakPower, tireTransform.position, ForceMode.Acceleration);
-                    }
-                    else
-                    {
-                        carRigidbody.AddForceAtPosition(-accelerationDirection * backPower, tireTransform.position, ForceMode.Acceleration);
-                    }
-                }
-
+                carRigidbody.AddForceAtPosition(accelerationDirection * availableTorque, wheel.position, ForceMode.Acceleration);
+            }
+            else
+            {
+                carRigidbody.AddForceAtPosition(accelerationDirection * breakPower, wheel.position, ForceMode.Acceleration);
             }
         }
-
+        else if (verInput < 0.0f)
+        {
+            if (carSpeed > 0)
+            {
+                carRigidbody.AddForceAtPosition(-accelerationDirection * breakPower, wheel.position, ForceMode.Acceleration);
+            }
+            else
+            {
+                carRigidbody.AddForceAtPosition(-accelerationDirection * backPower, wheel.position, ForceMode.Acceleration);
+            }
+        }
     }
 
     #endregion
 
     #region Steering
 
-    private void Steering()
+    private void Steering(Transform wheel)
     {
+        Vector3 steeringDir = wheel.right;
 
-        float raycastDistance = restDist + travelDist + tireRadius;
+        Vector3 tireWorldVel = carRigidbody.GetPointVelocity(wheel.position);
 
-        foreach (Transform suspensionPoint in suspensionPoints)
-        {
+        float steeringVel = Vector3.Dot(steeringDir, tireWorldVel);
 
-            Ray ray = new Ray(suspensionPoint.position, -suspensionPoint.up);
+        float desiredVelChange = -steeringVel * tireGripFactor;
 
-            if (Physics.Raycast(ray, out RaycastHit hit, raycastDistance))
-            {
-
-                Vector3 steeringDir = suspensionPoint.right;
-
-                Vector3 tireWorldVel = carRigidbody.GetPointVelocity(suspensionPoint.position);
-
-                float steeringVel = Vector3.Dot(steeringDir, tireWorldVel);
-
-                float desiredVelChange = -steeringVel * tireGripFactor;
-
-                carRigidbody.AddForceAtPosition(desiredVelChange * steeringDir, suspensionPoint.position, ForceMode.VelocityChange);
-
-            }
-        }
-
+        carRigidbody.AddForceAtPosition(desiredVelChange * steeringDir, wheel.position, ForceMode.VelocityChange);
     }
 
     private void RotateWheel()
@@ -229,6 +210,7 @@ public class Car : MonoBehaviour
             } else {
                 newSteeringAngle = currentSteeringAngle + horInput * rotateSpeed * Time.deltaTime;
             }
+
             tireTransform.localEulerAngles = Mathf.Clamp(newSteeringAngle, -maxSteeringAngle, maxSteeringAngle) * Vector3.up;
         }
     }
@@ -239,16 +221,16 @@ public class Car : MonoBehaviour
 
     private void Visualisation()
     {
-        for (int i = 0; i < suspensionPoints.Length; i++)
-        {
-            // Gizmos.color = Color.yellow;
-            // Gizmos.DrawLine(tireTransforms[i].position, tireVelocity[i] * 10 + tireTransforms[i].position);
+        foreach (Transform wheel in frontWheels) {
+            Gizmos.color = Color.red;
 
-            // Gizmos.color = Color.green;
-            // Gizmos.DrawLine(tireTransforms[i].position, Vector3.Dot(tireVelocity[i], tireTransforms[i].up) * tireTransforms[i].up + tireTransforms[i].position);
+            Gizmos.DrawLine(wheel.position, Vector3.Dot(wheel.right, carRigidbody.GetPointVelocity(wheel.position)) * wheel.right * 10 + wheel.position);
+        }
 
-            // Gizmos.color = Color.blue;
-            // Gizmos.DrawLine(tireTransforms[i].position, Vector3.Dot(tireVelocity[i], tireTransforms[i].forward) * tireTransforms[i].forward + tireTransforms[i].position);
+        foreach (Transform wheel in rearWheels) {
+            Gizmos.color = Color.red;
+
+            Gizmos.DrawLine(wheel.position, Vector3.Dot(wheel.right, carRigidbody.GetPointVelocity(wheel.position)) * wheel.right * 10 + wheel.position);
         }
     }
 
