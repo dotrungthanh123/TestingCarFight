@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
 
-public class UIManager : MonoBehaviour
+public class UIManager : Singleton<UIManager>
 {
     [SerializeField] private GameObject shop;
     [SerializeField] private GameObject menu;
@@ -12,7 +12,6 @@ public class UIManager : MonoBehaviour
     
     public void CloseShop() {
         shop.transform.DOMoveY(-1080, 1);
-        shop.SetActive(false);
         scrollList.UnLoad();
     }
 
@@ -23,7 +22,6 @@ public class UIManager : MonoBehaviour
 
     public void CloseMenu() {
         menu.transform.DOMoveY(1620, 1);
-        menu.SetActive(false);
     }
 
     public void OpenShop() {
@@ -32,6 +30,11 @@ public class UIManager : MonoBehaviour
     }
     
     public void OpenInGame() {
-        // ingame.transform.DOMoveX()
+        ingame.SetActive(true);
+        ingame.transform.DOMoveY(540, 1);
+    }
+
+    public void CloseInGame() {
+        ingame.transform.DOMoveY(1620, 1);
     }
 }

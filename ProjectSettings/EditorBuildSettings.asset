@@ -6,6 +6,27 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Game/Scenes/Game.unity
-    guid: 2cda990e2423bbf4892e6590ba056729
+    path: Assets/External Assets/TreasureFX/Demo/Scenes/Scene1.unity
+    guid: e8e7f3b54c6642a4bb74ba2a3befc27b
+  - enabled: 1
+    path: Assets/External Assets/TreasureFX/Demo/Scenes/Scene2.unity
+    guid: 136e4417653bd6b4689c5f8db812b1f4
+  - enabled: 1
+    path: Assets/External Assets/TreasureFX/Demo/Scenes/Scene3.unity
+    guid: d071c9d413549ce4dafcd7306e0683ef
+  - enabled: 1
+    path: Assets/External Assets/TreasureFX/Demo/Scenes/Scene4.unity
+    guid: 9be21ea4fc56839429d8c6dda0ab46e3
+  - enabled: 1
+    path: Assets/External Assets/TreasureFX/Demo/Scenes/Scene5.unity
+    guid: 7914abb2d715d934d871f6ea4b1cac44
+  - enabled: 1
+    path: Assets/External Assets/TreasureFX/Demo/Scenes/Scene6.unity
+    guid: d2e9266ac8f56a64bb3f9d8a70d45039
+  - enabled: 1
+    path: Assets/External Assets/TreasureFX/Demo/Scenes/Scene7.unity
+    guid: 9d9383546714530478db979bce70ab59
+  - enabled: 1
+    path: Assets/External Assets/TreasureFX/Demo/Scenes/Scene8.unity
+    guid: 1d3114f89f8db2b4a83c49ab65b560d6
   m_configObjects: {}
