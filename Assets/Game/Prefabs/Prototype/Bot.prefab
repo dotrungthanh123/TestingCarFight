@@ -682,7 +682,7 @@ MonoBehaviour:
   sensorAngleStep: 5
   sensorDistance: 10
   horAvoidScaler: 1
-  minAngleToSteer: 4
+  minAngleToSteer: 1
   baseAngle: 180
 --- !u!114 &6110865305323263077
 MonoBehaviour:

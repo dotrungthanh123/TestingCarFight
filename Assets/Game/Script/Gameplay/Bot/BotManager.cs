@@ -48,8 +48,6 @@ public class BotManager : Singleton<BotManager>
             currentBot++;
         }
         
-        Debug.Log(1);
-
         counter.Start(ActiveBot, timeToActiveBot);
     }
 }

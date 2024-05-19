@@ -28,6 +28,7 @@ public class GameManager : Singleton<GameManager>
     }
 
     public void OnEnd() {
+        player.enabled = false;
         for (int i = 0; i < cars.Length; i++) {
             cars[i].SetInput(0, 0);
         }

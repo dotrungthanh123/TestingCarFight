@@ -37,4 +37,9 @@ public class UIManager : Singleton<UIManager>
     public void CloseInGame() {
         ingame.transform.DOMoveY(1620, 1);
     }
+
+    public void OnEnd() {
+        OpenMenu();
+        CloseInGame();
+    }
 }

@@ -9,13 +9,9 @@ public class CarStatus : MonoBehaviour
     [SerializeField] private Slider hpSlider;
     [SerializeField] private float sliderSpeed;
     [SerializeField] private LayerMask obstacleLayer;
+    [SerializeField] private float maxHp;
 
     private float hp;
-    private float maxHp;
-
-    private void Start() {
-        maxHp = 100;
-    }
 
     private void Update() {
         hpSlider.value = Mathf.Lerp(hpSlider.value, hp / maxHp, Time.deltaTime * sliderSpeed);
@@ -23,19 +19,20 @@ public class CarStatus : MonoBehaviour
 
     private void OnCollisionEnter(Collision other) {
         if (other.gameObject.layer == 3) {
-            hp -= 5;
+            hp -= 10;
         } else if (other.gameObject.tag == "Bot") {
-            hp -= 15; 
+            hp -= 20; 
         }
         
         if (hp <= 0) {
             BotManager.Ins.OnEnd();
             GameManager.Ins.OnEnd();
+            UIManager.Ins.OnEnd();
         }
 
     }
     
     public void OnPlay() {
-        hp = 300;
+        hp = maxHp;
     }
 }
